@@ -32,10 +32,11 @@ const getUsers = async (url) => {
     } else {
       const json = await response.json();
       const users = await json.results;
+
       return users;
     }
   } catch (error) {
-    console.error(e);
+    console.error(error);
   }
 };
 
@@ -46,6 +47,7 @@ export default () => {
       name: null,
       gender: null,
     },
+    users: [],
   };
 
   const sorters = document.querySelectorAll('.sort');
@@ -79,5 +81,5 @@ export default () => {
     filterMenu.classList.toggle('visible');
   });
 
-  render(state);
+  getUsers();
 };
