@@ -8,6 +8,11 @@ const render = async (state) => {
   const json = await response.json();
   const users = await json.results;
   const sortedUsers = sortUsers(state.sort, users);
+  console.log(
+    '🚀 ~ file: app.js ~ line 11 ~ render ~ sortedUsers',
+    sortedUsers
+  );
+  console.log('🚀 ~ file: app.js ~ line 10 ~ render ~ users', users);
   const filteredUsers = filterUsers(state.filter, sortedUsers);
   const cards = filteredUsers
     .map((user) =>
@@ -46,7 +51,8 @@ export default () => {
   const sorters = document.querySelectorAll('.sort');
   sorters.forEach((sorter) =>
     sorter.addEventListener('change', ({ target }) => {
-      state[target.name] = target.value;
+      const { name, value } = target;
+      state[name] = value;
       render(state);
     })
   );
@@ -54,7 +60,8 @@ export default () => {
   const filters = document.querySelectorAll('.filter');
   filters.forEach((filter) =>
     filter.addEventListener('input', ({ target }) => {
-      state.filter[target.name] = target.value;
+      const { name, value } = target;
+      state.filter[name] = value.toLowerCase();
       render(state);
     })
   );

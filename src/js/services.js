@@ -19,16 +19,16 @@ const filters = {
     if (value === 'both') return true;
     return user.gender === value;
   },
-
   name: (value) => (user) => {
     if (value === '') return true;
-    return fullName(user).includes(value.toLowerCase());
+    return fullName(user).includes(value);
   },
 };
 
 export const sortUsers = (query, users) => {
   if (!query) return users;
-  return users.sort(sorters[query]);
+  const sortedUsers = [...users].sort(sorters[query]);
+  return sortedUsers;
 };
 
 export const filterUsers = (query, users) => {
@@ -44,11 +44,11 @@ export const filterUsers = (query, users) => {
 };
 
 export const resetFilters = (state) => {
-  for (let k in state) {
-    if (typeof state[k] === 'object') {
-      resetFilters(state[k]);
+  for (let field in state) {
+    if (typeof state[field] === 'object') {
+      resetFilters(state[field]);
     } else {
-      state[k] = null;
+      state[field] = null;
     }
   }
 };
