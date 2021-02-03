@@ -1,72 +1,72 @@
-import { API_REQ, sortUsers, filterUsers, resetFilters } from './services.js';
+import { sortUsers, filterUsers, resetFilters } from './services.js';
+import reformUserObj from './reformUserObj.js';
 import makeCardTemplate from './template.js';
 
 const contactsContainer = document.querySelector('.contacts-container');
 
-const render = async (state) => {
-  const users = await getUsers(API_REQ);
-  const sortedUsers = sortUsers(state.sort, users);
-  const filteredUsers = filterUsers(state.filter, sortedUsers);
-  const cards = filteredUsers
-    .map((user) =>
-      makeCardTemplate(
-        user.name,
-        user.email,
-        user.location.city,
-        user.dob.date,
-        user.dob.age,
-        user.phone,
-        user.picture.large
-      )
-    )
-    .join('');
+const render = (state) => {
+  const { filtration, users } = state;
+  console.log('🚀 ~ file: app.js ~ line 9 ~ render ~ state', state);
+
+  const sortedUsers = sortUsers(filtration.sort, users);
+  const filteredUsers = filterUsers(filtration.filter, sortedUsers);
+  const cards = filteredUsers.map((user) => makeCardTemplate(user)).join('');
+
   contactsContainer.innerHTML = cards;
 };
 
-const getUsers = async (url) => {
+const getUsers = async (state) => {
   try {
-    const response = await fetch(url);
+    const API_REQ = `https://randomuser.me/api/?results=30&seed=a123bc&nat=us,dk,fr,gb&inc=gender,name,registered,dob,location,picture,phone,email`;
+
+    const response = await fetch(API_REQ);
 
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`);
     } else {
       const json = await response.json();
       const users = await json.results;
-
-      return users;
+      savingUsers(state, users);
     }
   } catch (error) {
     console.error(error);
   }
 };
 
+const savingUsers = (state, users) => {
+  state.users = users.map(reformUserObj);
+};
+
+const initialize = async (state) => {
+  await getUsers(state);
+  render(state);
+};
+
 export default () => {
   const state = {
-    sort: null,
-    filter: {
-      name: null,
-      gender: null,
+    filtration: {
+      sort: null,
+      filter: {
+        name: null,
+        gender: null,
+      },
     },
     users: [],
   };
 
-  const sorters = document.querySelectorAll('.sort');
-  sorters.forEach((sorter) =>
-    sorter.addEventListener('change', ({ target }) => {
-      const { name, value } = target;
-      state[name] = value;
-      render(state);
-    })
-  );
+  const sorters = document.querySelector('.sorters');
+  sorters.addEventListener('change', ({ target }) => {
+    const { name, value } = target;
+    state.filtration[name] = value;
+    render(state);
+  });
 
-  const filters = document.querySelectorAll('.filter');
-  filters.forEach((filter) =>
-    filter.addEventListener('input', ({ target }) => {
-      const { name, value } = target;
-      state.filter[name] = value.toLowerCase();
-      render(state);
-    })
-  );
+  const filters = document.querySelector('.filters');
+  filters.addEventListener('input', ({ target }) => {
+    const { name, value } = target;
+    state.filtration.filter[name] = value.toLowerCase();
+    render(state);
+  });
 
   const resetButton = document.querySelector('.reset-filters');
   resetButton.addEventListener('click', (e) => {
@@ -81,5 +81,5 @@ export default () => {
     filterMenu.classList.toggle('visible');
   });
 
-  getUsers();
+  initialize(state);
 };
