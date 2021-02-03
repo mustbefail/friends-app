@@ -1,4 +1,4 @@
-import { sortUsers, filterUsers, resetFilters } from './services.js';
+import { sortUsers, filterUsers, resetState } from './services.js';
 import reformUserObj from './reformUserObj.js';
 import makeCardTemplate from './template.js';
 
@@ -7,8 +7,9 @@ const contactsContainer = document.querySelector('.contacts-container');
 const render = (state) => {
   const { filtration, users } = state;
   console.log('🚀 ~ file: app.js ~ line 9 ~ render ~ state', state);
+  const sortedUsers = [...users];
+  sortUsers(filtration.sort, sortedUsers);
 
-  const sortedUsers = sortUsers(filtration.sort, users);
   const filteredUsers = filterUsers(filtration.filter, sortedUsers);
   const cards = filteredUsers.map((user) => makeCardTemplate(user)).join('');
 
@@ -45,11 +46,8 @@ const initialize = async (state) => {
 export default () => {
   const state = {
     filtration: {
+      filter: {},
       sort: null,
-      filter: {
-        name: null,
-        gender: null,
-      },
     },
     users: [],
   };
@@ -71,7 +69,13 @@ export default () => {
   const resetButton = document.querySelector('.reset-filters');
   resetButton.addEventListener('click', (e) => {
     e.preventDefault();
-    resetFilters(state);
+    resetState(state);
+
+    const radio = document.querySelectorAll('input[type=radio]');
+    radio.forEach((el) => (el.checked = false));
+    const search = document.querySelectorAll('input[type=text]');
+    search.forEach((el) => (el.value = ''));
+
     render(state);
   });
 

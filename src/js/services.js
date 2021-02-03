@@ -1,13 +1,8 @@
-const sortBy = (field, reverse) => {
-  const getValue = (obj) => obj[field];
-  const order = JSON.parse(reverse) ? -1 : 1;
+const sortByAge = (a, b) => a.age - b.age;
 
-  return (a, b) => {
-    const aVal = getValue(a);
-    const bVal = getValue(b);
-    return order * ((aVal > bVal) - (bVal > aVal));
-  };
-};
+const sortByName = (a, b) => a.name.localeCompare(b.name);
+
+const sortByReg = (a, b) => a.registered - b.registered;
 
 const filters = {
   gender: (value) => ({ gender }) => {
@@ -21,13 +16,27 @@ const filters = {
 };
 
 export const sortUsers = (query, users) => {
-  if (!query) return users;
-  const [field, reverse] = query.split('_');
-  const sorter = sortBy(field, reverse);
-  return users.slice().sort(sorter);
+  switch (query) {
+    case 'age_asc':
+      users.sort(sortByAge);
+      break;
+    case 'age_desc':
+      users.sort((a, b) => sortByAge(b, a));
+      break;
+    case 'name_asc':
+      users.sort(sortByName);
+      break;
+    case 'name_desc':
+      users.sort((a, b) => sortByName(b, a));
+      break;
+    case 'registered_asc':
+      users.sort(sortByReg);
+      break;
+    case 'registered_desc':
+      users.sort((a, b) => sortByReg(b, a));
+      break;
+  }
 };
-
-export const sortUsers = (query, users) => {};
 
 export const filterUsers = (query, users) => {
   const fields = Object.keys(query);
@@ -41,12 +50,9 @@ export const filterUsers = (query, users) => {
   return result;
 };
 
-export const resetFilters = ({ filtration }) => {
-  for (let field in filtration) {
-    if (typeof filtration[field] === 'object') {
-      resetFilters(filtration[field]);
-    } else {
-      filtration[field] = null;
-    }
-  }
+export const resetState = (state) => {
+  state.filtration = {
+    filter: {},
+    sort: null,
+  };
 };
