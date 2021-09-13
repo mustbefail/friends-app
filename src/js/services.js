@@ -27,8 +27,6 @@ export const sortUsers = (query, users) => {
   return users.slice().sort(sorter);
 };
 
-export const sortUsers = (query, users) => {};
-
 export const filterUsers = (query, users) => {
   const fields = Object.keys(query);
   const activeFields = fields.filter((field) => query[field]);
